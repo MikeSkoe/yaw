@@ -3,7 +3,7 @@ open Vitest
 type nested = { a: string, b: int };
 type upper = { nested: nested, b: int };
 
-module NestedGetSet: Lense.GetSet with type t = nested and type value = string = {
+module NestedGetSet: Lense.GET_SET with type t = nested and type value = string = {
     type t = nested;
     type value = string;
 
@@ -11,7 +11,7 @@ module NestedGetSet: Lense.GetSet with type t = nested and type value = string =
     let set = (t, a) => { ...t, a };
 }
 
-module UpperGetSet: Lense.GetSet with type t = upper and type value = nested = {
+module UpperGetSet: Lense.GET_SET with type t = upper and type value = nested = {
     type t = upper;
     type value = nested;
 
@@ -22,8 +22,7 @@ module UpperGetSet: Lense.GetSet with type t = upper and type value = nested = {
 test("nested lense", _ => {
     module NestedLense = Lense.Make(NestedGetSet);
     let sample = { a: "a", b: 1 };
-    let { map } = module(NestedLense);
-    let { get, set } = module(NestedGetSet);
+    let { map, get, set } = module(NestedLense);
 
     sample
     ->map(Js.String2.toUpperCase)
