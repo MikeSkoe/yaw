@@ -25,7 +25,8 @@
   "bs-dependencies": [
     "@rescript/react",
     "@rescript/core",
-    "rescript-webapi"
+    "rescript-webapi",
+    "bs-fetch"
   ],
   "bs-dev-dependencies": [
     "rescript-vitest"
