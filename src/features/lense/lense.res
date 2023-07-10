@@ -1,36 +1,28 @@
-module type GET_SET = {
-  type t;
-  type value;
-
-  let get: t => value
-  let set: t => value => t
+type t<'context, 'value> = {
+  get: 'context => 'value,
+  set: 'context => 'value => 'context,
 }
 
-module type LENSE = {
-  include GET_SET;
+let make: ('context => 'value) => ('context => 'value => 'context) => t<'context, 'value>
+  = (get, set) => { get, set };
 
-  let map: t => (value => value) => t;
-  let fold: t => (value => value) => value;
+let compose: t<'a, 'b> => t<'b, 'c> => t<'a, 'c>
+  = (tab, tbc) => {
+    get: context => context->tab.get->tbc.get,
+    set: (context, value) => context->tab.set(context->tab.get->tbc.set(value))
+  }
+
+module type T = {
+  type context
+  type value
+  let t: t<context, value>;
 }
 
-module Make = (
-  T: GET_SET,
-): (LENSE with type t = T.t and type value = T.value) => {
-  include T;
+module Utils = (T: T) => {
+  let lense = T.t;
 
-  let map = (context, fn) => context->T.set(context->T.get->fn)
-  let fold = (context, fn) => context->T.get->fn
-}
-
-module Compose = (
-  AB: GET_SET,
-  BC: GET_SET with type t = AB.value,
-): (GET_SET with type t = AB.t and type value = BC.value) => {
-  type t = AB.t
-  type value = BC.value
-
-  let get = context => context->AB.get->BC.get
-
-  let set = (context, value) =>
-    context->AB.set(context->AB.get->BC.set(value))
+  let get = T.t.get;
+  let set = T.t.set;
+  let map = (context, fn) => context->lense.set(context->lense.get->fn)
+  let fold = (context, fn) => context->lense.get->fn
 }

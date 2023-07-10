@@ -3,13 +3,13 @@ let { equal } = module(Vitest.Assert);
 
 test("card", _ => {
     let card = Card.make("front", "back");
-    let { map: mapFront, get: getFront, set: setFront, fold: foldFront } = module(Card.FrontLense);
     let { toUpperCase } = module(Js.String2);
+    open Card.FrontLense;
 
-    card->getFront->equal("front");
-    card->foldFront(toUpperCase)->equal("FRONT");
-    card->foldFront(toUpperCase)->equal(
-        card->mapFront(toUpperCase)->getFront
+    card->get->equal("front");
+    card->fold(toUpperCase)->equal("FRONT");
+    card->fold(toUpperCase)->equal(
+        card->map(toUpperCase)->get
     );
-    card->setFront("FRONT")->getFront->equal("FRONT");
+    card->set("FRONT")->get->equal("FRONT");
 });
