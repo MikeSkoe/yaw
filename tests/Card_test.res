@@ -4,12 +4,12 @@ let { equal } = module(Vitest.Assert);
 test("card", _ => {
     let card = Card.make("front", "back");
     let { toUpperCase } = module(Js.String2);
-    open Card.FrontLense;
+    module FrontLense = Lense.Utils(Card.FrontLense);
 
-    card->get->equal("front");
-    card->fold(toUpperCase)->equal("FRONT");
-    card->fold(toUpperCase)->equal(
-        card->map(toUpperCase)->get
+    card->FrontLense.get->equal("front");
+    card->FrontLense.fold(toUpperCase)->equal("FRONT");
+    card->FrontLense.fold(toUpperCase)->equal(
+        card->FrontLense.map(toUpperCase)->FrontLense.get
     );
-    card->set("FRONT")->get->equal("FRONT");
+    card->FrontLense.set("FRONT")->FrontLense.get->equal("FRONT");
 });

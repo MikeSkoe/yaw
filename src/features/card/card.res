@@ -5,20 +5,20 @@ type t = {
 
 let make = (front, back) => { front, back };
 
-module FrontLense = Lense.Utils({
+module FrontLense = {
   type context = t;
   type value = string;
   let t = Lense.make(
     ({ front }) => front,
     (t, front) => { ...t, front },
   );
-});
+};
 
-module BackLense = Lense.Utils({
+module BackLense = {
   type context = t;
   type value = string;
   let t = Lense.make(
     ({ back }) => back,
     (t, back) => { ...t, back },
   );
-});
+};
