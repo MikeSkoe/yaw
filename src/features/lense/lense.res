@@ -6,12 +6,6 @@ type t<'context, 'value> = {
 let make: ('context => 'value) => ('context => 'value => 'context) => t<'context, 'value>
   = (get, set) => { get, set };
 
-let compose: t<'a, 'b> => t<'b, 'c> => t<'a, 'c>
-  = (tab, tbc) => {
-    get: context => context->tab.get->tbc.get,
-    set: (context, value) => context->tab.set(context->tab.get->tbc.set(value))
-  }
-
 module type T = {
   type context
   type value
@@ -26,3 +20,20 @@ module Utils = (T: T) => {
   let map = (context, fn) => context->lense.set(context->lense.get->fn)
   let fold = (context, fn) => context->lense.get->fn
 }
+
+module Compose = (
+  A: T,
+  B: T with type context = A.value,
+): (
+  T with
+  type context = A.context and
+  type value = B.value
+) => ({
+  type context = A.context;
+  type value = B.value;
+
+  let t = {
+    get: context => context->A.t.get->B.t.get,
+    set: (context, value) => context->A.t.set(context->A.t.get->B.t.set(value)),
+  }
+})
