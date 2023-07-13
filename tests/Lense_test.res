@@ -3,23 +3,23 @@ open Vitest
 type nested = { a: string, b: int };
 type upper = { nested: nested, b: int };
 
-module NestedLense = {
+module NestedOptic = {
     type context = nested;
     type value = string;
-    let t = Lense.make(({ a }) => a, (t, a) => { ...t, a });
+    let optic = Lense.make(({ a }) => a, (t, a) => { ...t, a });
 };
 
-module UpperLense = {
+module UpperOptic = {
     type context = upper;
     type value = nested;
-    let t = Lense.make(({ nested }) => nested, (t, nested) => { ...t, nested });
+    let optic = Lense.make(({ nested }) => nested, (t, nested) => { ...t, nested });
 };
 
-module UpperNestedLense = Lense.Compose(UpperLense, NestedLense);
+module UpperNestedLense = Lense.Compose(UpperOptic, NestedOptic);
 
 test("nested lense", _ => {
-    module NestedUtils = Lense.Utils(NestedLense);
-    open NestedUtils;
+    module NestedLense = Lense.Make(NestedOptic);
+    open NestedLense;
 
     let sample = { a: "a", b: 1 };
     let { toUpperCase } = module(Js.String2);
@@ -30,8 +30,8 @@ test("nested lense", _ => {
 });
 
 test("composed lense", _ => {
-    module UpperNestedUtils = Lense.Utils(UpperNestedLense);
-    open UpperNestedUtils;
+    module UpperNestedLense = Lense.Make(UpperNestedLense);
+    open UpperNestedLense;
 
     let sample = { nested: { a: "a", b: 1 }, b: 3 }
     let { toUpperCase } = module(Js.String2);

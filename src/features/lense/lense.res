@@ -1,39 +1,49 @@
-type t<'context, 'value> = {
+type optic<'context, 'value> = {
   get: 'context => 'value,
   set: 'context => 'value => 'context,
 }
 
-let make: ('context => 'value) => ('context => 'value => 'context) => t<'context, 'value>
-  = (get, set) => { get, set };
+let make = (get, set) => { get, set };
 
-module type T = {
+module type Optic = {
   type context
   type value
-  let t: t<context, value>;
+  let optic: optic<context, value>;
 }
 
-module Utils = (T: T) => {
-  let lense = T.t;
+module type Lense = {
+  include Optic;
 
-  let get = T.t.get;
-  let set = T.t.set;
-  let map = (context, fn) => context->lense.set(context->lense.get->fn)
-  let fold = (context, fn) => context->lense.get->fn
+  let get: context => value;
+  let set: (context, value) => context;
+  let map: (context, (value => value)) => context;
+  let fold: (context, (value => value)) => value;
 }
 
-module Compose = (
-  A: T,
-  B: T with type context = A.value,
-): (
-  T with
+module Make = (T: Optic): (
+  Lense with
+  type context = T.context and
+  type value = T.value
+) => {
+  include T;
+  let optic = T.optic;
+
+  let get = T.optic.get;
+  let set = T.optic.set;
+  let map = (context, fn) => context->optic.set(context->optic.get->fn)
+  let fold = (context, fn) => context->optic.get->fn
+}
+
+module Compose = (A: Optic, B: Optic with type context = A.value): (
+  Optic with
   type context = A.context and
   type value = B.value
 ) => ({
   type context = A.context;
   type value = B.value;
 
-  let t = {
-    get: context => context->A.t.get->B.t.get,
-    set: (context, value) => context->A.t.set(context->A.t.get->B.t.set(value)),
+  let optic = {
+    get: context => context->A.optic.get->B.optic.get,
+    set: (context, value) => context->A.optic.set(context->A.optic.get->B.optic.set(value)),
   }
-})
+});
