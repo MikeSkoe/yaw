@@ -1,6 +1,7 @@
 type t = { front: string, back: string, level: Level.t };
 
 let empty = { front: "", back: "", level: Level.empty };
+let make = (front, back) => { ...empty, front, back };
 
 module FrontOptic = {
   type context = t;
@@ -11,8 +12,6 @@ module FrontOptic = {
   );
 };
 
-module FrontLense = Lense.Make(FrontOptic);
-
 module BackOptic = {
   type context = t;
   type value = string;
@@ -22,4 +21,11 @@ module BackOptic = {
   );
 };
 
-module BackLense = Lense.Make(BackOptic);
+module LevelOptic = {
+  type context = t;
+  type value = Level.t;
+  let optic = Lense.make(
+    ({ level }) => level,
+    (t, level) => { ...t, level },
+  );
+}
