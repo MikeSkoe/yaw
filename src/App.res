@@ -10,27 +10,31 @@ module CardView = {
 }
 
 module CardViewPage = {
+    module ChangeLevel = {
+        @react.component
+        let make = (~setCard, ~mapLevel) => {
+            let changeLevel = _ => setCard(card => card->Card.setLevel(card.level->mapLevel));
+
+            <button onClick=changeLevel>
+                {"up level"->React.string}
+            </button>
+        }
+    }
+
     @react.component
     let make = () => {
         let (card, setCard) = React.useState(() => Card.make("Front", "BACK"));
-
-        let upLevel = 
-            <button key="upLevel" onClick={_ => setCard(Card.setLevel(_, card.level->Level.up))}>
-                {"up level"->React.string}
-            </button>
-
-        let downLevel =
-            <button key="downLevel" onClick={_ => setCard(Card.setLevel(_, card.level->Level.down))}>
-                {"down level"->React.string}
-            </button>
 
         <>
             <button onClick={_ => RescriptReactRouter.replace("/")}>{"back to main"->React.string}</button>
             <CardView card=card>
                 {switch card.level {
-                | Level.New => upLevel
-                | Level.Learned => downLevel
-                | _ => <>{downLevel}{upLevel}</>
+                | Level.New => <ChangeLevel key="up" setCard mapLevel=Level.up/>
+                | Level.Learned => <ChangeLevel key="down" setCard mapLevel=Level.down/>
+                | _ => <>
+                    <ChangeLevel key="down" setCard mapLevel=Level.down/>
+                    <ChangeLevel key="up" setCard mapLevel=Level.up/>
+                </>
                 }}
             </CardView>
         </>
@@ -46,6 +50,7 @@ module CardsListPage = {
         let setFront = event => setCard(Card.setFront(_, ReactEvent.Form.target(event)["value"]));
         let setBack = event => setCard(Card.setBack(_, ReactEvent.Form.target(event)["value"]));
         let addCard = _ => setStack(stack => stack->Stack.addCard(card));
+        let toView = _ => RescriptReactRouter.push("view");
 
         <div className="App">
             <h1>{card.front->React.string}</h1>
@@ -56,7 +61,11 @@ module CardsListPage = {
             </button>
 
             {stack.cards
-                ->Belt.List.map(card => <CardView card=card/>)
+                ->Belt.List.map(card =>
+                    <div key={card.front} onClick=toView>
+                        <CardView card=card/>
+                    </div>
+                )
                 ->Belt.List.toArray
                 ->React.array
             }
