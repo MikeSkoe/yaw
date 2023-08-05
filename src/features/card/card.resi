@@ -1,15 +1,13 @@
-type t
-let empty: t
-let make: (string, string) => t
+type t = {
+    id: int,
+    front: string,
+    back: string,
+    level: Level.t,
+};
 
-module FrontOptic: Lense.Optic with
-  type context = t and
-  type value = string;
+let empty: t;
+let make: (string, string) => t;
+let setFront: (t, string) => t;
+let setBack: (t, string) => t;
+let setLevel: (t, Level.t) => t;
 
-module BackOptic: Lense.Optic with
-  type context = t and
-  type value = string;
-
-module LevelOptic: Lense.Optic with
-  type context = t and
-  type value = Level.t;

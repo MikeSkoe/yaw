@@ -1,22 +1,32 @@
-type attempt = Failed | Neutral | Success;
+type step = int;
+let lowerStep = 0
+let upperStep = 4
 
-type t = int;
+type t =
+    | New
+    | Learning(step)
+    | Learned;
 
-let maxLevel = 5;
-let minLevel = 0;
-let empty = 0;
 
-let review: (t, attempt) => t
-    = (level, attempt) => {
-        let level = level + switch attempt {
-            | Failed => -1
-            | Neutral => 0
-            | Success => 1
-        };
+let empty = New;
 
-        level < minLevel
-            ? minLevel
-        : level > maxLevel
-            ? maxLevel
-            : level;
-    }
+let toString = t => switch t {
+    | New => "new"
+    | Learning(step) => `learning (${step->Belt.Int.toString})`
+    | Learned => "learned"
+};
+
+let up = t => switch t {
+    | New => Learning(lowerStep)
+    | Learning(step) when step == upperStep => Learned
+    | Learning(step) => Learning(step + 1)
+    | Learned => Learned
+}
+
+let down = t => switch t {
+    | New => New
+    | Learning(step) when step == lowerStep => New
+    | Learning(step) => Learning(step - 1)
+    | Learned => Learning(upperStep)
+}
+

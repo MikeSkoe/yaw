@@ -1,31 +1,14 @@
-type t = { front: string, back: string, level: Level.t };
-
-let empty = { front: "", back: "", level: Level.empty };
-let make = (front, back) => { ...empty, front, back };
-
-module FrontOptic = {
-  type context = t;
-  type value = string;
-  let optic = Lense.make(
-    ({ front }) => front,
-    (t, front) => { ...t, front },
-  );
+type t = {
+    id: int,
+    front: string,
+    back: string,
+    level: Level.t,
 };
 
-module BackOptic = {
-  type context = t;
-  type value = string;
-  let optic = Lense.make(
-    ({ back }) => back,
-    (t, back) => { ...t, back },
-  );
-};
+let empty = { front: "", back: "", level: Level.empty, id: 0 };
+let make = (front, back) => { ...empty, front, back, id: Js.Math.random_int(0, 999999) };
 
-module LevelOptic = {
-  type context = t;
-  type value = Level.t;
-  let optic = Lense.make(
-    ({ level }) => level,
-    (t, level) => { ...t, level },
-  );
-}
+let setFront = (t, front) => { ...t, front }
+let setBack = (t, back) => { ...t, back }
+let setLevel = (t, level) => { ...t, level }
+

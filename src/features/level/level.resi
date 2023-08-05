@@ -1,9 +1,11 @@
-type attempt = Failed | Neutral | Success;
-
-type t = int;
+type step;
+type t =
+    | New
+    | Learning(step)
+    | Learned;
 
 let empty: t;
-let minLevel: t;
-let maxLevel: t;
+let toString: t => string;
+let up: t => t;
+let down: t => t;
 
-let review: (t, attempt) => t
