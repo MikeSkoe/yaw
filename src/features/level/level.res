@@ -1,12 +1,11 @@
 type step = int;
-let lowerStep = 0
-let upperStep = 4
+let lowerStep = 1
+let upperStep = 3
 
 type t =
     | New
     | Learning(step)
     | Learned;
-
 
 let empty = New;
 

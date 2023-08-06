@@ -1,7 +1,7 @@
 module CardView = {
     @react.component
     let make = (~card: Card.t, ~children: option<React.element>=?) =>
-        <div key={card.id->Belt.Int.toString}>
+        <div key={card.id->Belt.Option.getWithDefault(0)->Belt.Int.toString}>
             <p>{card.front->React.string}</p>
             <p>{card.back->React.string}</p>
             <p>{`level: ${card.level->Level.toString}`->React.string}</p>
@@ -12,13 +12,10 @@ module CardView = {
 module CardViewPage = {
     module ChangeLevel = {
         @react.component
-        let make = (~setCard, ~mapLevel) => {
-            let changeLevel = _ => setCard(card => card->Card.setLevel(card.level->mapLevel));
-
-            <button onClick=changeLevel>
+        let make = (~setCard, ~mapLevel) =>
+            <button onClick={_ => setCard(card => card->Card.setLevel(card.level->mapLevel))}>
                 {"up level"->React.string}
             </button>
-        }
     }
 
     @react.component
@@ -41,41 +38,92 @@ module CardViewPage = {
     }
 }
 
+module CardsSchema = {
+    type id = int;
+    type t = Card.t;
+    let tableName = "cards";
+    let schema = [("cards", "++id,front,back,level")];
+}
+
+module CardsDexie = Dexie.Table.MakeTable(CardsSchema);
+
+let useDexieOption = (): option<Dexie.Database.t> => {
+    let (dexieOption, setDexie) = React.useState(_ => None);
+
+    React.useEffect0(() => {
+        let dexie = Dexie.Database.make("cards")
+        dexie
+        ->Dexie.Database.version(1)
+        ->Dexie.Version.stores(CardsSchema.schema)
+        ->ignore;
+
+        setDexie(_prev => Some(dexie))
+        None;
+    });
+
+    dexieOption;
+}
+
+module AddCard = {
+    @react.component
+    let make = (~dexie) => {
+        let (card, setCard) = React.useState(_ => Card.empty);
+        let getValue = (event): string => ReactEvent.Form.target(event)["value"];
+        let changeFront = event => setCard(card => card->Card.setFront(event->getValue));
+        let changeBack = event => setCard(card => card->Card.setBack(event->getValue));
+
+        <div>
+            <p>
+                {"Front: "->React.string}
+                <input type_="text" onChange=changeFront value=card.front />
+            </p>
+            <p>
+                {"Back: "->React.string}
+                <input type_="text" onChange=changeBack value=card.back />
+            </p>
+            <p>
+                {`Level: ${card.level->Level.toString}`->React.string}
+            </p>
+            <button onClick={_ => {
+                dexie->CardsDexie.put(card)->ignore;
+                setCard(_ => Card.empty);
+            }}>{"submit"->React.string}</button>
+        </div>
+    }
+}
+
+module CardsList = {
+    @react.component
+    let make = (~dexie) => {
+        let card = Dexie.LiveQuery.use0(
+            async () => {
+                let arr = await dexie->CardsDexie.where("id")->Dexie.Where.notEqual(-1)->Dexie.Collection.toArray;
+                Some(arr);
+            },
+        );
+        let onClick = _ => RescriptReactRouter.push("view");
+
+        <div>
+            <AddCard dexie />
+            {switch card {
+            | None => <div>{"no cards"->React.string}</div>
+            | Some(cards) => <div>{cards->Belt.Array.map(card => <div onClick><CardView card /></div>)->React.array}</div>
+            }}
+        </div>
+    }
+}
+
 module CardsListPage = {
     @react.component
-    let make = () => {
-        let (card, setCard) = React.useState(() => Card.make("Front", "BACK"));
-        let (stack, setStack) = React.useState(() => Stack.make("default"));
-
-        let setFront = event => setCard(Card.setFront(_, ReactEvent.Form.target(event)["value"]));
-        let setBack = event => setCard(Card.setBack(_, ReactEvent.Form.target(event)["value"]));
-        let addCard = _ => setStack(stack => stack->Stack.addCard(card));
-        let toView = _ => RescriptReactRouter.push("view");
-
-        <div className="App">
-            <h1>{card.front->React.string}</h1>
-            <input type_="text" value=card.front onInput=setFront />
-            <input type_="text" value=card.back onInput=setBack />
-            <button onClick=addCard>
-                {"add"->React.string}
-            </button>
-
-            {stack.cards
-                ->Belt.List.map(card =>
-                    <div key={card.front} onClick=toView>
-                        <CardView card=card/>
-                    </div>
-                )
-                ->Belt.List.toArray
-                ->React.array
-            }
-        </div>
+    let make = () => switch useDexieOption() {
+        | None => <div>{"((("->React.string}</div>
+        | Some(dexie) => <CardsList dexie />
     }
 }
 
 @react.component
 let make = () => switch RescriptReactRouter.useUrl().path {
     | list{"view"} => <CardViewPage/>
-    | _ => <CardsListPage/>
+    | _ => <CardsListPage />
 }
 

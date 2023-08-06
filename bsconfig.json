@@ -1,5 +1,5 @@
 {
-  "name": "vite-react-rescript-starter",
+  "name": "yaw",
   "sources": [
     {
       "dir": "src",
@@ -26,7 +26,8 @@
     "@rescript/react",
     "@rescript/core",
     "rescript-webapi",
-    "bs-fetch"
+    "bs-fetch",
+    "@dusty-phillips/rescript-dexie"
   ],
   "bs-dev-dependencies": [
     "rescript-vitest"

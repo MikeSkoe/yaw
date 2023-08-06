@@ -1,5 +1,5 @@
 type t = {
-    id: int,
+    id: option<int>,
     front: string,
     back: string,
     level: Level.t,
