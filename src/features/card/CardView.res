@@ -1,9 +1,22 @@
+module Option = Belt.Option;
+
 @react.component
-let make = (~card: Card.t, ~children: option<React.element>=?) =>
-    <div key={card.id->Option.getWithDefault(0)->Int.toString}>
-        <p>{card.front->React.string}</p>
-        <p>{card.back->React.string}</p>
-        <p>{`level: ${card.level->Level.toString}`->React.string}</p>
-        {children->Option.getWithDefault(<></>)}
-    </div>
+let make = (~card: Card.t) => {
+    let id = card.id->Option.getWithDefault(0)->Int.toString;
+    let deleteCard = CardRepository.useDeleteCard();
+
+    <dl>
+        <Link.Push hash=`view/${id}`>
+            <h2>
+                <span>{`${card.front} `->React.string}</span>
+                <small>{card.level->Level.toString->React.string}</small>
+            </h2>
+            <p>{card.back->React.string}</p>
+        </Link.Push>
+
+        <button onClick={_ => deleteCard(card.id->Option.getWithDefault(0))->ignore}>
+            {"delete"->React.string}
+        </button>
+    </dl>
+}
 

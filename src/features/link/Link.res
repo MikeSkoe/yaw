@@ -1,7 +1,7 @@
 module Push = {
     @react.component
-    let make = (~hash, ~id, ~children) =>
-        <div onClick={_ => RescriptReactRouter.push(`${hash}/${id}`)}>
+    let make = (~hash, ~children) =>
+        <div onClick={_ => RescriptReactRouter.push(hash)}>
             {children}
         </div>
 }

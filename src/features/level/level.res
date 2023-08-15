@@ -1,3 +1,5 @@
+module Int = Belt.Int;
+
 type step = int;
 let lowerStep = 1
 let upperStep = 3
@@ -10,9 +12,9 @@ type t =
 let empty = New;
 
 let toString = t => switch t {
-    | New => "new"
-    | Learning(step) => `learning (${step->Belt.Int.toString})`
-    | Learned => "learned"
+    | New => "[new]"
+    | Learning(step) => `[${step->Int.toString}]`
+    | Learned => "[learned]"
 };
 
 let up = t => switch t {

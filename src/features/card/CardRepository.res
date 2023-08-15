@@ -11,7 +11,13 @@ let useCards = () => {
     cards->Option.getWithDefault([]);
 }
 
-let useCard = (id) => {
+let useDeleteCard = () => {
+    let dexie = React.useContext(CardDexie.Context.context);
+
+    CardDexie.Table.delete(dexie);
+}
+
+let useCard = id => {
     let dexie = React.useContext(CardDexie.Context.context);
     let card = Dexie.LiveQuery.use0(() => dexie->CardDexie.Table.getById(id));
     let setCard: (Card.t => Card.t) => unit

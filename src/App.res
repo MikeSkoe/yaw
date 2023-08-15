@@ -1,4 +1,4 @@
-open Belt;
+module Option = Belt.Option;
 
 module CardViewPage = {
     module ChangeLevel = {
@@ -36,31 +36,26 @@ module CardViewPage = {
 
 module CardsListPage = {
     @react.component
-    let make = () => {
-        let cards = CardRepository.useCards();
-        let (card, setCard) = React.useState(_ => Card.empty);
-
-        <div>
-            <EditableCard card setCard />
-
-            {cards
-            ->Array.map(card => {
-                let id = card.id->Option.mapWithDefault("", Int.toString);
-
-                <Link.Push hash="view" id key={id}>
-                    <CardView card/>
-                </Link.Push>;
-            })
-            ->React.array}
-        </div>
-    }
+    let make = () =>
+        <>
+            <h1>{"Cards list"->React.string}</h1>
+            <ul>
+                {CardRepository.useCards()
+                ->Array.map(card => <CardView card  key={card.id->Option.getWithDefault(0)->Int.toString} />)
+                ->React.array}
+            </ul>
+        </>
 }
 
 @react.component
-let make = () => switch RescriptReactRouter.useUrl().path {
-    | list{"view", id} => switch Int.fromString(id) {
-        | None => <div>{"wrong id"->React.string}</div>
-        | Some(id) => <CardViewPage id />}
-    | _ => <CardsListPage />
-}
+let make = () =>
+    <div>
+        {switch RescriptReactRouter.useUrl().path {
+            | list{"view", id} => switch Int.fromString(id) {
+                | Some(id) => <CardViewPage id />
+                | None => <div>{"wrong id"->React.string}</div>
+            }
+            | _ => <CardsListPage />
+        }}
+    </div>
 
