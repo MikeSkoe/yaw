@@ -41,7 +41,7 @@ module CardsListPage = {
             <h1>{"Cards list"->React.string}</h1>
             <ul>
                 {CardRepository.useCards()
-                ->Array.map(card => <CardView card  key={card.id->Option.getWithDefault(0)->Int.toString} />)
+                ->Array.map(card => <CardView card  key={card.id->Int.toString} />)
                 ->React.array}
             </ul>
         </>
