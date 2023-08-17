@@ -3,6 +3,7 @@ type unvalidated = {
     front: string,
     back: string,
     description: string,
+    level: Level.t,
 }
 
 type t;

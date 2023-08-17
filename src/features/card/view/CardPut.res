@@ -17,31 +17,51 @@ let make = (~id) => {
     let changeFront = event => setUnvalidated(unvalidated => { ...unvalidated, front: event->getValue });
     let changeBack = event => setUnvalidated(unvalidated => { ...unvalidated, back: event->getValue });
     let changeDescription = event => setUnvalidated(unvalidated => { ...unvalidated, description: event->getValue });
+    let upLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.up });
+    let downLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.down });
 
     let onSubmit = _ => {
         switch (unvalidated->Card.validate->Option.map(putCard)) {
             | None => Js.log("Not validated");
-            | Some(_) => Js.log("Saved!");
+            | Some(_) => {
+                if (card->Option.isNone) {
+                    setUnvalidated(_ => Card.empty);
+                }
+                Js.log("Saved!");
+            };
         }
     }
 
     <dl>
-        <h2>{"Front: "->React.string}</h2>
-        <input onChange=changeFront value=unvalidated.front style={ReactDOMStyle.make(~width="100%", ())} />
+        <b>{"Front: "->React.string}</b>
+        <input onChange=changeFront value=unvalidated.front />
 
         <br />
 
-        <h3>{"Back: "->React.string}</h3>
-        <input onChange=changeBack value=unvalidated.back style={ReactDOMStyle.make(~width="100%", ())} />
+        <b>{"Back: "->React.string}</b>
+        <input onChange=changeBack value=unvalidated.back />
 
         <br />
 
-        <p>{"Description: "->React.string}</p>
-        <textarea onChange=changeDescription value=unvalidated.description style={ReactDOMStyle.make(~width="100%", ())} rows=5 />
+        <b style={ReactDOMStyle.make(~verticalAlign="top", ())}>{"Description: "->React.string}</b>
+        <textarea onChange=changeDescription value=unvalidated.description rows=3 />
 
+        <br />
+
+        {card
+        ->Option.map(_ => <>
+            <b>{"Level: "->React.string}</b>
+            <button onClick=downLevel>{"lower"->React.string}</button>
+            {unvalidated.level->Level.toString->React.string}
+            <button onClick=upLevel>{"higher"->React.string}</button>
+        </>)
+        ->Option.getWithDefault(React.null)}
+
+        <br />
         <br />
 
         <button onClick=onSubmit>{"Submit"->React.string}</button>
+
         <hr />
     </dl>
 }
