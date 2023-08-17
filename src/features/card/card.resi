@@ -1,15 +1,20 @@
-type t = {
-    id: int,
+type unvalidated = {
+    id: option<int>,
     front: string,
     back: string,
     description: string,
-    level: Level.t,
-};
+}
 
-let empty: t;
-let make: (string, string, string) => t;
-let setFront: (t, string) => t;
-let setBack: (t, string) => t;
-let setDescription: (t, string) => t;
-let setLevel: (t, Level.t) => t;
+type t;
+
+let empty: unvalidated;
+
+let validate: unvalidated => option<t>;
+let unvalidate: t => unvalidated;
+
+let getFront: t => string;
+let getBack: t => string;
+let getDescription: t => string;
+let getLevel: t => Level.t;
+let getId: t => int;
 

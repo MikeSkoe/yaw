@@ -1,17 +1,9 @@
 module Option = Belt.Option;
 
 module CardViewPage = {
-    module ChangeLevel = {
-        @react.component
-        let make = (~setCard, ~mapLevel, ~label) =>
-            <button onClick={_ => setCard(card => card->Card.setLevel(card.level->mapLevel))}>
-                {label->React.string}
-            </button>
-    }
-
     @react.component
     let make = (~id) => {
-        let (card, setCard) = CardRepository.useCard(id);
+        let card = CardRepository.useCard(id);
 
         <>
             <Link.Replace hash="/">
@@ -20,16 +12,9 @@ module CardViewPage = {
                 </button>
             </Link.Replace>
 
-            <EditableCard card setCard />
-
-            {switch card.level {
-            | Level.New => <ChangeLevel label="up level" key="up" key="up" setCard mapLevel=Level.up/>
-            | Level.Learned => <ChangeLevel label="down level" key="up" key="down" setCard mapLevel=Level.down/>
-            | _ => <>
-                <ChangeLevel label="down level" key="down" setCard mapLevel=Level.down/>
-                <ChangeLevel label="up level" key="up" setCard mapLevel=Level.up/>
-            </>
-            }}
+            {card
+            ->Option.map(card => <CardPut id={card->Card.getId} />)
+            ->Option.getWithDefault(React.null)}
         </>
     }
 }
@@ -38,10 +23,12 @@ module CardsListPage = {
     @react.component
     let make = () =>
         <>
+            <CardPut id={-1} />
+
             <h1>{"Cards list"->React.string}</h1>
             <ul>
                 {CardRepository.useCards()
-                ->Array.map(card => <CardView card  key={card.id->Int.toString} />)
+                ->Array.map(card => <CardView card  key={card->Card.getId->Int.toString} />)
                 ->React.array}
             </ul>
         </>

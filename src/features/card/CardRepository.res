@@ -20,13 +20,8 @@ let useDeleteCard = () => {
 let useCard = id => {
     let dexie = React.useContext(CardDexie.Context.context);
     let card = Dexie.LiveQuery.use0(() => dexie->CardDexie.Table.getById(id));
-    let setCard: (Card.t => Card.t) => unit
-        = fn => switch card {
-            | Some(card) => dexie->CardDexie.Table.put(fn(card))->ignore;
-            | _ => None->ignore;
-        };
 
-    (card->Option.getWithDefault(Card.empty), setCard);
+    card;
 }
 
 let usePutCard = () => {
@@ -35,3 +30,4 @@ let usePutCard = () => {
 
     putCard;
 }
+

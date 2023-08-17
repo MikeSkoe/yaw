@@ -1,3 +1,10 @@
+type unvalidated = {
+    id: option<int>,
+    front: string,
+    back: string,
+    description: string,
+}
+
 type t = {
     id: int,
     front: string,
@@ -6,11 +13,24 @@ type t = {
     level: Level.t,
 };
 
-let empty = { front: "", back: "", level: Level.empty, id: 0, description: "" };
-let make = (front, back, description) => { ...empty, front, back, description };
+let empty: unvalidated = { front: "", back: "", description: "", id: None }
 
-let setFront = (t, front) => { ...t, front }
-let setBack = (t, back) => { ...t, back }
-let setDescription = (t, description) => { ...t, description }
-let setLevel = (t, level) => { ...t, level }
+let validate = ({ front, back, description, id }: unvalidated) => switch (front, back) {
+    | ("", _) | (_, "") => None;
+    | (front, back) => Some({
+        back,
+        front,
+        description,
+        level: Level.empty,
+        id: id->Option.getWithDefault((Js.Date.now() *. 10000.)->Belt.Float.toInt),
+    });
+};
+
+let unvalidate = ({ front, back, description, id }: t) => ({ front, back, description, id: Some(id) });
+
+let getFront = ({ front }) => front
+let getBack = ({ back }) => back
+let getDescription = ({ description }) => description
+let getLevel = ({ level }) => level
+let getId = ({ id }) => id;
 
