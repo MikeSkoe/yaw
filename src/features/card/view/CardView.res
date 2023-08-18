@@ -9,7 +9,7 @@ let make = (~card: Card.t) => {
     let back = card->Card.getBack;
     let level = card->Card.getLevel;
 
-    <dl>
+    <dl style={ReactDOMStyle.make(~width="fit-content", ~margin="0 1rem", ())}>
         <Link.Push hash=`view/${id->Int.toString}`>
             <h2>
                 <span>{`${front} `->React.string}</span>

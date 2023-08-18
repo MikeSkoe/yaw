@@ -1,4 +1,7 @@
 module Option = Belt.Option;
+module Array = Belt.Array;
+module Map = Belt.Map;
+module List = Belt.List;
 
 module CardViewPage = {
     @react.component
@@ -21,17 +24,31 @@ module CardViewPage = {
 
 module StackPage = {
     @react.component
-    let make = (~stackName) =>
+    let make = (~stackName) => {
+        let stack = StackRepository.useStack(stackName);
+
+        Js.log(stack);
+
         <>
             <CardPut id={-1} stackName />
 
             <h1>{`Cards list [${stackName}]`->React.string}</h1>
             <ul>
-                {CardRepository.useCards()
-                ->Array.map(card => <CardView card  key={card->Card.getId->Int.toString} />)
+                {stack.boxes
+                ->Map.toArray
+                ->Array.map(((key, value)) => <>
+                    <h2>{key->Level.toString->React.string}</h2>
+                    <div style={ReactDOMStyle.make(~display="flex", ~overflow="auto", ())}>
+                        {value
+                        ->List.map(card => <CardView card key={card->Card.getId->Int.toString} />)
+                        ->List.toArray
+                        ->React.array}
+                    </div>
+                </>)
                 ->React.array}
             </ul>
         </>
+    }
 }
 
 @react.component

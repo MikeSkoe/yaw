@@ -3,7 +3,7 @@ module Schema = {
     type t = Card.t;
 
     let tableName = "cards";
-    let schema = [("cards", "++id,front,back,level")];
+    let schema = [("cards", "++id,front,back,level,description,stackName")];
 }
 
 module Table = Dexie.Table.MakeTable(Schema);
@@ -11,7 +11,7 @@ module Table = Dexie.Table.MakeTable(Schema);
 module Context = {
     let dexie = Dexie.Database.make("cards");
     let version = dexie
-        ->Dexie.Database.version(1)
+        ->Dexie.Database.version(2)
         ->Dexie.Version.stores(Schema.schema);
 
     let context = React.createContext(dexie);

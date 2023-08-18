@@ -1,16 +1,3 @@
-let useCards = () => {
-    let dexie = React.useContext(CardsDexie.Context.context);
-
-    let cards = Dexie.LiveQuery.use0(async () => Some(
-        await dexie
-            ->CardsDexie.Table.where("id")
-            ->Dexie.Where.notEqual(-1)
-            ->Dexie.Collection.toArray,
-    ));
-
-    cards->Option.getWithDefault([]);
-}
-
 let useDeleteCard = () => {
     let dexie = React.useContext(CardsDexie.Context.context);
 
