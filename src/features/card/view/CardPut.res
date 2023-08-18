@@ -1,7 +1,7 @@
 module Option = Belt.Option;
 
 @react.component
-let make = (~id) => {
+let make = (~id, ~stackName) => {
     let putCard = CardRepository.usePutCard();
     let card = CardRepository.useCard(id);
     let getValue = event => ReactEvent.Form.target(event)["value"];
@@ -19,9 +19,10 @@ let make = (~id) => {
     let changeDescription = event => setUnvalidated(unvalidated => { ...unvalidated, description: event->getValue });
     let upLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.up });
     let downLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.down });
+    let stackName = card->Option.map(Card.getStackName)->Option.getWithDefault(stackName);
 
     let onSubmit = _ => {
-        switch (unvalidated->Card.validate->Option.map(putCard)) {
+        switch (unvalidated->Card.validate(stackName)->Option.map(putCard)) {
             | None => Js.log("Not validated");
             | Some(_) => {
                 if (card->Option.isNone) {
@@ -33,6 +34,7 @@ let make = (~id) => {
     }
 
     <dl>
+        <h3>{"Stack: "->React.string}<b>{stackName->React.string}</b></h3>
         <b>{"Front: "->React.string}</b>
         <input onChange=changeFront value=unvalidated.front />
 

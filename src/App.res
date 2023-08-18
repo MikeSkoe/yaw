@@ -2,7 +2,7 @@ module Option = Belt.Option;
 
 module CardViewPage = {
     @react.component
-    let make = (~id) => {
+    let make = (~id, ~stackName) => {
         let card = CardRepository.useCard(id);
 
         <>
@@ -13,19 +13,19 @@ module CardViewPage = {
             </Link.Replace>
 
             {card
-            ->Option.map(card => <CardPut id={card->Card.getId} />)
+            ->Option.map(card => <CardPut id={card->Card.getId} stackName />)
             ->Option.getWithDefault(React.null)}
         </>
     }
 }
 
-module CardsListPage = {
+module StackPage = {
     @react.component
-    let make = () =>
+    let make = (~stackName) =>
         <>
-            <CardPut id={-1} />
+            <CardPut id={-1} stackName />
 
-            <h1>{"Cards list"->React.string}</h1>
+            <h1>{`Cards list [${stackName}]`->React.string}</h1>
             <ul>
                 {CardRepository.useCards()
                 ->Array.map(card => <CardView card  key={card->Card.getId->Int.toString} />)
@@ -39,10 +39,10 @@ let make = () =>
     <div>
         {switch RescriptReactRouter.useUrl().path {
             | list{"view", id} => switch Int.fromString(id) {
-                | Some(id) => <CardViewPage id />
+                | Some(id) => <CardViewPage id stackName="unnamed" />
                 | None => <div>{"wrong id"->React.string}</div>
             }
-            | _ => <CardsListPage />
+            | _ => <StackPage stackName="unnamed" />
         }}
     </div>
 

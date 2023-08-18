@@ -1,8 +1,42 @@
-type t = { name: string, cards: list<Card.t> };
+module Map = Belt.Map;
 
-let empty = { cards: list{}, name: "" };
+module LevelCmp = Belt.Id.MakeComparable({
+  type t = Level.t
+  let cmp = (a, b) => Pervasives.compare(a, b)
+});
 
-let make = name => { ...empty, name };
+type boxes = Map.t<LevelCmp.t, list<Card.t>, LevelCmp.identity>;
 
-let addCard = (t, card) => { ...t, cards: t.cards->Belt.List.add(card) }
+type t = {
+    name: string,
+    boxes: boxes,
+};
+
+let empty = {
+    name: "",
+    boxes: Map.make(~id=module(LevelCmp)),
+};
+
+let make = (
+    name: string,
+    cards: list<Card.t>,
+): t => {
+    let rec makeBoxes = (cards: list<Card.t>, boxes: boxes): boxes => switch cards {
+        | list{} => boxes
+        | list{card, ...cards} => {
+            let level = card->Card.getLevel;
+            let currentValue = boxes->Map.get(level);
+
+            let levelCards = switch currentValue {
+                | None => list{card}
+                | Some(levelCards) => levelCards->List.add(card)
+            };
+
+            makeBoxes(cards, boxes->Map.set(level, levelCards));
+        }
+    }
+    let boxes = makeBoxes(cards, empty.boxes);
+
+    { name, boxes }
+};
 
