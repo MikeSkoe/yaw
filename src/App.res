@@ -26,10 +26,17 @@ module StackPage = {
     @react.component
     let make = (~stackName) => {
         let stack = StackRepository.useStack(stackName);
-
-        Js.log(stack);
+        let stackNames = StackRepository.useStackNames();
 
         <>
+            <dl>
+                <h3>{"Stacks: "->React.string}</h3>
+                <ul>
+                    {stackNames
+                    ->Array.map(name => <li key=name>{name->React.string}</li>)
+                    ->React.array}
+                </ul>
+            </dl>
             <CardPut id={-1} stackName />
 
             <h1>{`Cards list [${stackName}]`->React.string}</h1>
