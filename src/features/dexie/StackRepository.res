@@ -22,51 +22,62 @@ let useStackNames = (): array<string> => {
     }
 }
 
+let usePutStack = () => {
+    let dexie = React.useContext(Repository.Context.context);
+    let putStack = (stack: Stack.t) =>
+        dexie
+        ->Repository.StackTable.put(stack->Repository.StackSchema.fromStack)
+        ->ignore;
+
+    putStack;
+}
+
 let useStack = (name: string): Stack.t => {
     let dexie = React.useContext(Repository.Context.context);
 
-    let stack = Dexie.LiveQuery.use0(async () =>
+    let stackRecord = Dexie.LiveQuery.use1(async () =>
         await dexie
-        ->Repository.StackTable.findByCriteria({ "name": name })
-        ->Dexie.Collection.first
-    )->Option.map(Repository.StackSchema.toStack);
+            ->Repository.StackTable.findByCriteria({ "name": name })
+            ->Dexie.Collection.first,
+        [name],
+    );
 
-    let cards = Dexie.LiveQuery.use1(async () => switch stack {
-        | None => Some({
-            let arr =
-                await dexie
+    let cardRecords = Dexie.LiveQuery.use1(async () => switch stackRecord {
+        | None => Some(
+            await dexie
                 ->Repository.CardTable.where("stack")
                 ->Dexie.Where.equals(Stack.empty.id)
-                ->Dexie.Collection.toArray;
-
-            arr->Array.keepMap(Repository.CardSchema.toCard)
-        })
-        | Some(stack) => Some({
-            let arr =
-                await dexie
+                ->Dexie.Collection.toArray
+        )
+        | Some(stackRecord) => Some(
+            await dexie
                 ->Repository.CardTable.where("stack")
-                ->Dexie.Where.equals(stack.id)
-                ->Dexie.Collection.toArray;
+                ->Dexie.Where.equals(stackRecord.id)
+                ->Dexie.Collection.toArray
+        )
+    }, [stackRecord]);
 
-            arr->Array.keepMap(Repository.CardSchema.toCard)
-        })
-    }, [stack]);
+    let cards = React.useMemo1(_ =>
+        cardRecords
+            ->Option.getWithDefault([])
+            ->Array.keepMap(Repository.CardSchema.toCard)
+            ->List.fromArray,
+        [cardRecords],
+    );
 
-    switch stack {
+    let stack = React.useMemo2(_ => switch stackRecord {
         | None => Stack.make(
             Stack.empty.id,
             Stack.empty.name,
-            cards
-            ->Option.map(List.fromArray)
-            ->Option.getWithDefault(list{}),
+            cards,
         )
         | Some(stack) => Stack.make(
             stack.id,
             stack.name,
-            cards
-            ->Option.map(List.fromArray)
-            ->Option.getWithDefault(list{}),
+            cards,
         )
-    }
+    }, (stackRecord, cards));
+
+    stack;
 }
 

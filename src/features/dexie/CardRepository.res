@@ -11,12 +11,23 @@ let useCard = id => {
     React.useMemo1(_ => card->Option.flatMap(Repository.CardSchema.toCard), [card]);
 }
 
-let usePutCard = () => {
+let usePutCard = (stackName: string) => {
     let dexie = React.useContext(Repository.Context.context);
-    let putCard = (card: Card.t) =>
+    let putCard = async (card: Card.t) => {
+        let stack =
+            await dexie
+            ->Repository.StackTable.findByCriteria({ "name": stackName })
+            ->Dexie.Collection.first;
+
+        let stack = stack->Option.getWithDefault(Repository.StackSchema.empty);
+
         dexie
-        ->Repository.CardTable.put(card->Repository.CardSchema.fromCard)
+        ->Repository.CardTable.put({
+            ...card->Repository.CardSchema.fromCard,
+            stack: stack.id,
+        })
         ->ignore;
+    }
 
     putCard;
 }

@@ -2,9 +2,9 @@ module Option = Belt.Option;
 
 @react.component
 let make = (~id, ~stackName) => {
-    let putCard = CardRepository.usePutCard();
+    let putCard = CardRepository.usePutCard(stackName);
     let card = CardRepository.useCard(id);
-    let getValue = event => ReactEvent.Form.target(event)["value"];
+    let onValue = (fn, event) => fn(ReactEvent.Form.target(event)["value"]);
     let (unvalidated, setUnvalidated) = React.useState(_ => Card.empty);
 
     React.useEffect1(() => {
@@ -14,9 +14,9 @@ let make = (~id, ~stackName) => {
         None;
     }, [card]);
 
-    let changeFront = event => setUnvalidated(unvalidated => { ...unvalidated, front: event->getValue });
-    let changeBack = event => setUnvalidated(unvalidated => { ...unvalidated, back: event->getValue });
-    let changeDescription = event => setUnvalidated(unvalidated => { ...unvalidated, description: event->getValue });
+    let changeFront = front => setUnvalidated(unvalidated => { ...unvalidated, front });
+    let changeBack = back => setUnvalidated(unvalidated => { ...unvalidated, back });
+    let changeDescription = description => setUnvalidated(unvalidated => { ...unvalidated, description });
     let upLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.up });
     let downLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.down });
     let stackName = card->Option.map(Card.getStackName)->Option.getWithDefault(stackName);
@@ -37,19 +37,24 @@ let make = (~id, ~stackName) => {
     }
 
     <dl>
-        <h3>{"Stack: "->React.string}<b>{stackName->React.string}</b></h3>
+        <h3>
+            {"Stack: "->React.string}
+            <b>{stackName->React.string}</b>
+        </h3>
         <b>{"Front: "->React.string}</b>
-        <input onChange=changeFront value=unvalidated.front />
+        <input onChange=onValue(changeFront) value=unvalidated.front />
 
         <br />
 
         <b>{"Back: "->React.string}</b>
-        <input onChange=changeBack value=unvalidated.back />
+        <input onChange=onValue(changeBack) value=unvalidated.back />
 
         <br />
 
-        <b style={ReactDOMStyle.make(~verticalAlign="top", ())}>{"Description: "->React.string}</b>
-        <textarea onChange=changeDescription value=unvalidated.description rows=3 />
+        <b style={ReactDOMStyle.make(~verticalAlign="top", ())}>
+            {"Description: "->React.string}
+        </b>
+        <textarea onChange=onValue(changeDescription) value=unvalidated.description rows=3 />
 
         <br />
 

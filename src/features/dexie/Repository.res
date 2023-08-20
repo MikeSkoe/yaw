@@ -29,7 +29,7 @@ module CardSchema = {
         }
         ->Card.validate;
 
-    let fromCard = (Card.Validated(card)) =>
+    let fromCard = (Card.Validated(card)): t =>
         {
             id: card.id,
             front: card.front,
@@ -63,6 +63,11 @@ module StackSchema = {
 
     let tableName = "stacks";
     let schema = (tableName, "++id,name");
+
+    let fromStack = (stack: Stack.t): t => {
+        id: stack.id,
+        name: stack.name,
+    }
 }
 
 module CardTable = Dexie.Table.MakeTable(CardSchema);
