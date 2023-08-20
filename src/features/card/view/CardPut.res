@@ -1,4 +1,5 @@
 module Option = Belt.Option;
+module Promise = Js.Promise2;
 
 @react.component
 let make = (~id, ~stackName) => {
@@ -7,7 +8,7 @@ let make = (~id, ~stackName) => {
     let onValue = (fn, event) => fn(ReactEvent.Form.target(event)["value"]);
     let (unvalidated, setUnvalidated) = React.useState(_ => Card.empty);
 
-    React.useEffect1(() => {
+    React.useLayoutEffect1(() => {
         card
         ->Option.map(Card.unvalidate)
         ->Option.forEach(unvalidated => setUnvalidated(_ => unvalidated));
@@ -22,18 +23,19 @@ let make = (~id, ~stackName) => {
     let stackName = card->Option.map(Card.getStackName)->Option.getWithDefault(stackName);
 
     let onSubmit = _ => {
-        let newCard = {
+        {
             ...unvalidated,
             id: card->Option.map((Validated({id})) => id)->Option.getWithDefault(Card.makeId())
-        };
-
-        switch newCard->Card.validate->Option.map(putCard) {
-            | None => Js.log("Not validated");
-            | Some(_) => {
+        }
+        ->putCard
+        ->Promise.then(result => switch result {
+            | Error(msg) => Js.log(msg);
+            | Ok(_) => {
                 setUnvalidated(_ => Card.empty);
                 Js.log("Saved!");
             }
-        }
+        }->Promise.resolve)
+        ->ignore;
     }
 
     <dl>
