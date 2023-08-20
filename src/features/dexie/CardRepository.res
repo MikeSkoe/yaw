@@ -1,19 +1,22 @@
 let useDeleteCard = () => {
-    let dexie = React.useContext(CardsDexie.Context.context);
+    let dexie = React.useContext(Repository.Context.context);
 
-    CardsDexie.Table.delete(dexie);
+    Repository.CardTable.delete(dexie);
 }
 
 let useCard = id => {
-    let dexie = React.useContext(CardsDexie.Context.context);
-    let card = Dexie.LiveQuery.use0(() => dexie->CardsDexie.Table.getById(id));
+    let dexie = React.useContext(Repository.Context.context);
+    let card = Dexie.LiveQuery.use0(() => dexie->Repository.CardTable.getById(id));
 
-    card;
+    React.useMemo1(_ => card->Option.flatMap(Repository.CardSchema.toCard), [card]);
 }
 
 let usePutCard = () => {
-    let dexie = React.useContext(CardsDexie.Context.context);
-    let putCard = card => dexie->CardsDexie.Table.put(card)->ignore;
+    let dexie = React.useContext(Repository.Context.context);
+    let putCard = (card: Card.t) =>
+        dexie
+        ->Repository.CardTable.put(card->Repository.CardSchema.fromCard)
+        ->ignore;
 
     putCard;
 }

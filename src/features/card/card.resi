@@ -1,17 +1,21 @@
-type unvalidated = {
-    id: option<int>,
+type card = {
+    id: int,
     front: string,
     back: string,
     description: string,
+    stackName: string,
+    stackId: int,
     level: Level.t,
 }
 
-type t;
+type t = Validated(card);
 
-let empty: unvalidated;
+let empty: card;
 
-let validate: (unvalidated, string) => option<t>;
-let unvalidate: t => unvalidated;
+let makeId: unit => int;
+
+let validate: card => option<t>;
+let unvalidate: t => card;
 
 let getFront: t => string;
 let getBack: t => string;

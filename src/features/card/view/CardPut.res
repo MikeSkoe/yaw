@@ -12,7 +12,7 @@ let make = (~id, ~stackName) => {
         ->Option.map(Card.unvalidate)
         ->Option.forEach(unvalidated => setUnvalidated(_ => unvalidated));
         None;
-    }, [card])
+    }, [card]);
 
     let changeFront = event => setUnvalidated(unvalidated => { ...unvalidated, front: event->getValue });
     let changeBack = event => setUnvalidated(unvalidated => { ...unvalidated, back: event->getValue });
@@ -22,14 +22,17 @@ let make = (~id, ~stackName) => {
     let stackName = card->Option.map(Card.getStackName)->Option.getWithDefault(stackName);
 
     let onSubmit = _ => {
-        switch (unvalidated->Card.validate(stackName)->Option.map(putCard)) {
+        let newCard = {
+            ...unvalidated,
+            id: card->Option.map((Validated({id})) => id)->Option.getWithDefault(Card.makeId())
+        };
+
+        switch newCard->Card.validate->Option.map(putCard) {
             | None => Js.log("Not validated");
             | Some(_) => {
-                if (card->Option.isNone) {
-                    setUnvalidated(_ => Card.empty);
-                }
+                setUnvalidated(_ => Card.empty);
                 Js.log("Saved!");
-            };
+            }
         }
     }
 

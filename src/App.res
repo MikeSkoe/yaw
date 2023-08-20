@@ -63,10 +63,10 @@ let make = () =>
     <div>
         {switch RescriptReactRouter.useUrl().path {
             | list{"view", id} => switch Int.fromString(id) {
-                | Some(id) => <CardViewPage id stackName="unnamed" />
+                | Some(id) => <CardViewPage id stackName=Stack.empty.name />
                 | None => <div>{"wrong id"->React.string}</div>
             }
-            | _ => <StackPage stackName="unnamed" />
+            | _ => <StackPage stackName=Stack.empty.name />
         }}
     </div>
 

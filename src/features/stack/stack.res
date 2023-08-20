@@ -8,16 +8,21 @@ module LevelCmp = Belt.Id.MakeComparable({
 type boxes = Map.t<LevelCmp.t, list<Card.t>, LevelCmp.identity>;
 
 type t = {
+    id: int,
     name: string,
     boxes: boxes,
 };
 
 let empty = {
-    name: "",
+    id: 0,
+    name: "unnamed",
     boxes: Map.make(~id=module(LevelCmp)),
 };
 
+let makeId = () => Belt.Float.toInt(Js.Date.now() *. 10000.);
+
 let make = (
+    id: int,
     name: string,
     cards: list<Card.t>,
 ): t => {
@@ -37,6 +42,6 @@ let make = (
     }
     let boxes = makeBoxes(cards, empty.boxes);
 
-    { name, boxes }
+    { name, boxes, id }
 };
 

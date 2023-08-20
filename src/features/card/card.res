@@ -1,60 +1,38 @@
-type unvalidated = {
-    id: option<int>,
-    front: string,
-    back: string,
-    description: string,
-    level: Level.t,
-}
-
-type t = {
+type card = {
     id: int,
     front: string,
     back: string,
     description: string,
     stackName: string,
+    stackId: int,
     level: Level.t,
 };
 
-let empty: unvalidated = {
+type t = Validated(card);
+
+let empty = {
     front: "",
     back: "",
     description: "",
-    id: None,
+    id: 0,
     level: Level.empty,
-}
-
-let validate = ({
-    front,
-    back,
-    description,
-    id,
-    level,
-}: unvalidated, stackName: string) => switch (front, back) {
-    | ("", _) | (_, "") => None;
-    | (front, back) => Some({
-        back,
-        front,
-        description,
-        level,
-        stackName,
-        id: id->Option.getWithDefault(
-            (Js.Date.now() *. 10000.)->Belt.Float.toInt,
-        ),
-    });
+    stackName: "",
+    stackId: 0,
 };
 
-let unvalidate = (t: t): unvalidated => ({
-    id: Some(t.id),
-    front: t.front,
-    back: t.back,
-    description: t.description,
-    level: t.level,
-});
+let makeId = () => Belt.Float.toInt(Js.Date.now() *. 10000.);
 
-let getFront = ({ front }) => front
-let getBack = ({ back }) => back
-let getDescription = ({ description }) => description
-let getLevel = ({ level }) => level
-let getId = ({ id }) => id;
-let getStackName = ({ stackName }) => stackName;
+let validate = (card: card): option<t> => switch (card.front, card.back) {
+    | ("", _) | (_, "") => None
+    | _ => Some(Validated(card));
+};
+
+let unvalidate = (Validated(card)) => card;
+
+let getFront = (Validated({ front })) => front
+let getBack = (Validated({ back })) => back
+let getDescription = (Validated({ description })) => description
+let getLevel = (Validated({ level })) => level
+let getId = (Validated({ id })) => id;
+let getStackName = (Validated({ stackName })) => stackName;
 
