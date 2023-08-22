@@ -29,15 +29,8 @@ module CardSchema = {
         }
         ->Card.validate;
 
-    let fromCard = (Card.Validated(card)): t =>
-        {
-            id: card.id,
-            front: card.front,
-            back: card.back,
-            level: card.level,
-            description: card.description,
-            stack: card.stackId,
-        }
+    let fromCard = ({ id, front, back, level, description, stackId }: Card.unvalidated): t =>
+        { id, front, back, level, description, stack: stackId }
 
     let tableName = "cards";
     let schema = (tableName, "++id,front,back,level,description,stack");

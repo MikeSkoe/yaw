@@ -1,4 +1,4 @@
-type card = {
+type unvalidated = {
     id: int,
     front: string,
     back: string,
@@ -8,7 +8,7 @@ type card = {
     level: Level.t,
 };
 
-type t = Validated(card);
+type t = unvalidated;
 
 let empty = {
     front: "",
@@ -22,17 +22,18 @@ let empty = {
 
 let makeId = () => Belt.Float.toInt(Js.Date.now() *. 10000.);
 
-let validate = (card: card): option<t> => switch (card.front, card.back) {
+let validate = card => switch (card.front, card.back) {
     | ("", _) | (_, "") => None
-    | _ => Some(Validated(card));
+    | _ => Some(card);
 };
 
-let unvalidate = (Validated(card)) => card;
+let unvalidate = (card) => card;
 
-let getFront = (Validated({ front })) => front
-let getBack = (Validated({ back })) => back
-let getDescription = (Validated({ description })) => description
-let getLevel = (Validated({ level })) => level
-let getId = (Validated({ id })) => id;
-let getStackName = (Validated({ stackName })) => stackName;
+let getFront = ({ front }) => front
+let getBack = ({ back }) => back
+let getDescription = ({ description }) => description
+let getLevel = ({ level }) => level
+let getId = ({ id }) => id;
+let getStackName = ({ stackName }) => stackName;
+let getStackId = ({ stackId }) => stackId;
 

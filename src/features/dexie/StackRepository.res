@@ -1,9 +1,10 @@
 module Array = Belt.Array;
 module Set = Belt.Set;
 
-let useStackNames = (): array<string> => {
+let useStackNameIds = (): array<(string, int)> => {
     let dexie = React.useContext(Repository.Context.context);
 
+    let emptyNameId = (Stack.empty.name, Stack.empty.id);
     let names = Dexie.LiveQuery.use0(async () => Some(
         await dexie
         ->Repository.StackTable.where("id")
@@ -12,13 +13,11 @@ let useStackNames = (): array<string> => {
     ));
 
     switch names {
-    | None => [Stack.empty.name]
+    | None => [emptyNameId]
     | Some(arr) =>
         arr
-        ->Array.map(({ name }) => name)
-        ->Array.concat([Stack.empty.name])
-        ->Set.String.fromArray
-        ->Set.String.toArray
+        ->Array.map(({ name, id }) => (name, id))
+        ->Array.concat([emptyNameId])
     }
 }
 
@@ -32,14 +31,14 @@ let usePutStack = () => {
     putStack;
 }
 
-let useStack = (name: string): Stack.t => {
+let useStack = (id: int): Stack.t => {
     let dexie = React.useContext(Repository.Context.context);
 
     let stackRecord = Dexie.LiveQuery.use1(async () =>
         await dexie
-            ->Repository.StackTable.findByCriteria({ "name": name })
+            ->Repository.StackTable.findByCriteria({ "id": id })
             ->Dexie.Collection.first,
-        [name],
+        [id],
     );
 
     let cardRecords = Dexie.LiveQuery.use1(async () => switch stackRecord {

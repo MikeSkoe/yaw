@@ -2,8 +2,8 @@ module Option = Belt.Option;
 module Promise = Js.Promise2;
 
 @react.component
-let make = (~id, ~stackName) => {
-    let putCard = CardRepository.usePutCard(stackName);
+let make = (~id: int, ~stackId: int) => {
+    let putCard = CardRepository.usePutCard(stackId);
     let card = CardRepository.useCard(id);
     let onValue = (fn, event) => fn(ReactEvent.Form.target(event)["value"]);
     let (unvalidated, setUnvalidated) = React.useState(_ => Card.empty);
@@ -20,12 +20,12 @@ let make = (~id, ~stackName) => {
     let changeDescription = description => setUnvalidated(unvalidated => { ...unvalidated, description });
     let upLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.up });
     let downLevel = _ => setUnvalidated(unvalidated => { ...unvalidated, level: unvalidated.level->Level.down });
-    let stackName = card->Option.map(Card.getStackName)->Option.getWithDefault(stackName);
+    let stackName = card->Option.map(Card.getStackName)->Option.getWithDefault(Stack.empty.name);
 
     let onSubmit = _ => {
         {
             ...unvalidated,
-            id: card->Option.map((Validated({id})) => id)->Option.getWithDefault(Card.makeId())
+            id: card->Option.map(card => card->Card.getId)->Option.getWithDefault(Card.makeId())
         }
         ->putCard
         ->Promise.then(result => switch result {
